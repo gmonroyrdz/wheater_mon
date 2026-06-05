@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Monitor de Alertas - GET</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    #log {
+      background: #fff;
+      padding: 1em;
+      border: 1px solid #ccc;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    .alerta {
+      color: red;
+      font-weight: bold;
+    }
+    .normal {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Monitor de Alertas (GET cada 5s)</h1>
+  <p>Consultando el servicio <code>/alert</code> vía GET...</p>
+
+  <div id="log"></div>
+
+  <script>
+    const log = document.getElementById("log");
+
+    function appendLog(data) {
+      const time = new Date().toLocaleTimeString();
+      const p = document.createElement("p");
+
+      const alerta = data.temperatura > 35 || data.co2 > 800;
+      p.className = alerta ? "alerta" : "normal";
+
+      p.textContent = `[${time}] Barrio: ${data.barrio}, Temp: ${data.temperatura}°C, CO₂: ${data.co2} ppm`;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function obtenerAlerta() {
+      try {
+        const res = await fetch("http://localhost:5003/alert");
+        if (!res.ok) throw new Error(`Código HTTP: ${res.status}`);
+        const data = await res.json();
+        appendLog(data);
+      } catch (err) {
+        const time = new Date().toLocaleTimeString();
+        const p = document.createElement("p");
+        p.className = "alerta";
+        p.textContent = `[${time}] ❌ Error al obtener: ${err.message}`;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+      }
+    }
+
+    obtenerAlerta();
+    setInterval(obtenerAlerta, 5000);
+  </script>
+
+</body>
+</html>

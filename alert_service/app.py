@@ -34,6 +34,7 @@ def alertar():
       200:
         description: Verificación de alerta completada
     """
+    global ultima_alerta
     data = request.get_json()
     ultima_alerta = data
     if data["temperatura"] > 35 or data["co2"] > 800:
